@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mail Agent v0.0.18</title>
+<style>
+:root{--pane-image:none;--ink:#17212b;--glass:rgba(5,35,27,.74)}
+*{box-sizing:border-box}html,body{height:100%;margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{color:#fff;background:radial-gradient(ellipse at 75% 10%,#315b38aa,transparent 40%),radial-gradient(ellipse at 15% 70%,#0f5031bb,transparent 45%),linear-gradient(135deg,#061a16,#0b3527 52%,#031611);overflow:hidden}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{height:100%;padding:14px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.top{height:70px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.brand{min-width:170px;font-size:28px;font-weight:750;letter-spacing:-1px}.version{font-size:10px;color:#b8c9c0;font-weight:500}
+.accounts{display:flex;align-items:center;gap:8px;min-width:0;flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;padding:4px 0}.accounts::-webkit-scrollbar{display:none}
+.account{position:relative;flex:0 0 64px;height:54px;border:1px solid transparent;border-radius:16px;background:#ffffff18;color:#fff;font-size:23px;font-weight:750}.account.active{background:#38858070;border-color:#beffec55}.account .tip{position:absolute;top:58px;left:50%;transform:translateX(-50%);padding:6px 9px;border-radius:8px;background:#071b17;border:1px solid #ffffff25;font-size:11px;font-weight:400;white-space:nowrap;opacity:0;pointer-events:none;z-index:8}.account:hover .tip{opacity:1}
+.add{flex:0 0 48px;width:48px;height:48px;border-radius:50%;border:1px solid #ffffff30;background:#ffffff18;color:#fff;font-size:26px}
+.search{height:48px;width:clamp(170px,22vw,310px);display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:14px;background:#ffffff20;border:1px solid #ffffff20}.search input{width:100%;min-width:0;background:none;border:0;outline:0;color:white}.search input::placeholder{color:#d0d9d5}
+.iconbtn{width:40px;height:42px;border:0;border-radius:10px;background:transparent;color:white;font-size:22px}.iconbtn:hover{background:#ffffff20}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:265px minmax(0,1fr);gap:16px}.sidebar{display:flex;flex-direction:column;gap:12px;min-height:0}
+.compose{height:54px;border:0;border-radius:14px;background:white;color:#101820;font-weight:650}.folders{flex:1;overflow:auto;min-height:0;padding:10px;background:var(--glass);border:1px solid #ffffff22;border-radius:18px;backdrop-filter:blur(16px)}
+.folder{width:100%;height:46px;display:flex;align-items:center;gap:12px;padding:0 11px;border:0;border-radius:11px;background:transparent;color:#f4f8f6;text-align:left}.folder:hover{background:#ffffff15}.folder.active{background:#ffffff30}.folder .ico{width:22px;text-align:center;font-size:19px}.count{margin-left:auto;padding:3px 8px;border-radius:9px;background:#ffffff28;font-size:12px}.sep{height:1px;background:#ffffff24;margin:10px 5px}
+.reading{min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;border-radius:18px;color:var(--ink);background-color:#fff;background-image:linear-gradient(rgba(255,255,255,.95),rgba(255,255,255,.95)),var(--pane-image);background-size:cover;background-position:center;box-shadow:0 12px 40px #0002}
+.toolbar{height:58px;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:0 15px;border-bottom:1px solid #edf0f3;background:#ffffffef;overflow-x:auto;white-space:nowrap}.tool{border:0;background:transparent;color:#18212b;padding:9px 10px;border-radius:9px;font-size:13px}.tool:hover{background:#f1f4f7}.tool.push{margin-left:auto}
+.message{flex:1;overflow:auto;padding:25px 34px}.subject{font-size:clamp(22px,2vw,33px);margin:4px 0 26px;line-height:1.2}.senderrow{display:flex;align-items:center;gap:13px}.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:white;font-weight:700;font-size:21px}.sender{font-weight:650}.date,.to{font-size:13px;color:#7d8794}.date{margin-left:9px}.to{margin-top:5px}.bodytext{font-size:17px;line-height:1.7;margin-top:36px;white-space:pre-wrap}.signature{margin-top:28px}.replybar{display:flex;gap:9px;margin-top:28px}.replybar button{padding:9px 13px;background:#fff;border:1px solid #dfe4e9;border-radius:10px;color:#17202b}
+.empty{height:100%;display:grid;place-items:center;text-align:center;color:#7d8794}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#102d25;color:#fff;padding:11px 16px;border-radius:11px;transition:.2s;z-index:30}.toast.show{opacity:1;transform:translate(-50%,0)}
+.backdrop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:#00130fbb;backdrop-filter:blur(7px);z-index:20}.backdrop.open{display:flex}.modal{width:min(520px,100%);background:white;color:#14202a;border-radius:17px;overflow:hidden}.modalhead{padding:18px 22px;border-bottom:1px solid #e8edf0;font-weight:700;display:flex;justify-content:space-between}.modalbody{padding:18px 22px;display:flex;flex-direction:column;gap:10px}.field{width:100%;padding:11px;border:1px solid #dce2e7;border-radius:9px;color:#17202a}.modalfoot{padding:0 22px 20px;display:flex;justify-content:flex-end;gap:9px}.primary,.secondary{border:0;border-radius:9px;padding:10px 15px}.primary{background:#146f56;color:white}.secondary{background:#f1f3f5;color:#26313d}
+@media(max-width:850px){.brand{min-width:auto}.main{grid-template-columns:210px minmax(0,1fr)}.tool .word{display:none}}
+@media(max-width:620px){.app{padding:8px}.top{height:auto;flex-wrap:wrap}.brand{width:100%}.accounts{order:2;flex-basis:100%}.search{flex:1;width:auto}.main{grid-template-columns:58px minmax(0,1fr);gap:8px}.compose{font-size:0}.folders{padding:6px}.folder{justify-content:center;padding:0}.folder .word,.folder .count{display:none}.message{padding:18px 13px}.toolbar{height:50px}.tool{padding:8px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+ <div class="brand">☁ mail <span class="version">v0.0.18</span></div>
+ <nav class="accounts" id="accounts" aria-label="Почтовые аккаунты"></nav>
+ <label class="search">⌕ <input id="search" placeholder="Поиск по почте"></label>
+ <button class="iconbtn" id="backgroundButton" title="Настроить фон">▧</button>
+ <button class="iconbtn" id="syncButton" title="Проверить сервер">⟳</button>
+ <button class="iconbtn" title="Уведомления" onclick="notify('Уведомления пока демонстрационные')">♧</button>
+</header>
+<main class="main">
+<aside class="sidebar"><button class="compose" id="compose">↗　Написать письмо</button><nav class="folders" id="folders"></nav></aside>
+<section class="reading"><div class="toolbar">
+<button class="tool" data-action="back">←</button><button class="tool" data-action="delete">♲ <span class="word">Удалить</span></button><button class="tool" data-action="archive">▣ <span class="word">В архив</span></button><button class="tool" data-action="move">⇥ <span class="word">В папку</span></button><button class="tool" data-action="spam">☟ <span class="word">Спам</span></button><button class="tool" data-action="more">···</button><button class="tool push" data-action="reply">↶ <span class="word">Ответить</span></button><button class="tool" data-action="forward">↗ <span class="word">Переслать</span></button>
+</div><div class="message" id="message"></div></section>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+<div class="backdrop" id="composeModal"><div class="modal"><div class="modalhead">Новое письмо <button onclick="closeModal('composeModal')">×</button></div><div class="modalbody"><input class="field" id="to" placeholder="Кому"><input class="field" id="subject" placeholder="Тема"><textarea class="field" id="body" rows="7" placeholder="Текст письма"></textarea></div><div class="modalfoot"><button class="secondary" onclick="closeModal('composeModal')">Отмена</button><button class="primary" id="send">Отправить</button></div></div></div>
+<div class="backdrop" id="bgModal"><div class="modal"><div class="modalhead">Настроить фон <button onclick="closeModal('bgModal')">×</button></div><div class="modalbody"><p style="margin:0;color:#65717c">Выбери изображение: на странице оно будет полноцветным, под письмом — едва заметным (около 5%).</p><input class="field" id="bgFile" type="file" accept="image/*"><div id="preview" style="height:100px;border-radius:10px;background:linear-gradient(135deg,#123b2c,#071b17);background-size:cover;background-position:center"></div><button class="secondary" id="resetBg">Вернуть стандартный фон</button></div><div class="modalfoot"><button class="secondary" onclick="closeModal('bgModal')">Закрыть</button><button class="primary" id="applyBg">Применить</button></div></div></div>
+<div class="backdrop" id="connectModal"><div class="modal"><div class="modalhead">Добавить почтовый ящик <button onclick="closeModal('connectModal')">×</button></div><div class="modalbody"><select class="field" id="provider"><option value="Gmail">Gmail</option><option value="Яндекс">Яндекс Почта</option><option value="Outlook">Outlook</option><option value="IMAP">Другой сервис (IMAP)</option></select><input class="field" id="accountName" placeholder="Название, например Заказы"><input class="field" id="accountEmail" type="email" placeholder="Адрес почты"><p style="font-size:12px;color:#7b8792;margin:0">Добавление здесь сохраняет аккаунт только в интерфейсе. Реальную авторизацию подключим на сервере. Не вводи пароль от почты в эту форму.</p></div><div class="modalfoot"><button class="secondary" onclick="closeModal('connectModal')">Отмена</button><button class="primary" id="addAccount">Добавить</button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const accounts=[
+{id:'mail',name:'Рабочая',provider:'Mail.ru',icon:'@',email:'lazer-zao@mail.ru',color:'#1677ff'},
+{id:'ya',name:'Личная',provider:'Яндекс',icon:'Я',email:'lazer-zao@yandex.ru',color:'#e33'},
+{id:'gm',name:'Заказы',provider:'Gmail',icon:'M',email:'lazerzao@gmail.com',color:'#4285f4'},
+{id:'ya2',name:'Клиенты',provider:'Яндекс',icon:'Я',email:'clients@yandex.ru',color:'#e33'},
+{id:'gm2',name:'Сервисы',provider:'Gmail',icon:'M',email:'services@gmail.com',color:'#4285f4'},
+{id:'mail2',name:'Архив',provider:'Mail.ru',icon:'@',email:'archive@mail.ru',color:'#1677ff'},
+{id:'out',name:'Проекты',provider:'Outlook',icon:'O',email:'projects@outlook.com',color:'#e90'}
+];
+const folders=[['inbox','Входящие','✉','20'],['sent','Отправленные','➤',''],['drafts','Черновики','▤','4'],['spam','Спам','☟','3'],['trash','Корзина','♜',''],['sep'],['starred','Помеченные','⚑',''],['snoozed','Отложенные','◷',''],['archive','Архив','▣',''],['all','Все письма','✉',''],['more','Ещё','···','']];
+const demos={
+mail:{sender:'Светлана',subject:'Re[2]: штамп просьба сделать другой',date:'Сегодня, 17:59',body:'Штамп уже не нужен\n\nСпасибо',signature:'Отправлено из мобильной Почты Mail',avatar:'С',color:'#15945d'},
+ya:{sender:'Александр',subject:'Макет печати — согласование',date:'Сегодня, 16:42',body:'Добрый день!\n\nПосмотрите, пожалуйста, обновлённый макет.',signature:'С уважением, Александр',avatar:'А',color:'#d83a30'},
+gm:{sender:'Google',subject:'Уведомление безопасности',date:'Сегодня, 13:18',body:'Проверьте недавние действия в своём аккаунте Google.',signature:'Демонстрационное письмо',avatar:'G',color:'#4285f4'},
+ya2:{sender:'Клиент',subject:'Новый заказ на изготовление',date:'Сегодня, 12:04',body:'Здравствуйте! Подскажите сроки изготовления печати.',signature:'Отправлено с телефона',avatar:'К',color:'#3478d4'},
+gm2:{sender:'Сервис',subject:'Ваш еженедельный отчёт',date:'Сегодня, 10:31',body:'Отчёт готов. Откройте вложение, чтобы посмотреть детали.',signature:'Автоматическое уведомление',avatar:'S',color:'#4285f4'},
+mail2:{sender:'Архив',subject:'Сохранённая переписка',date:'Вчера',body:'Это письмо из архивного ящика.',signature:'',avatar:'А',color:'#1677ff'},
+out:{sender:'Команда проекта',subject:'Обновление проекта',date:'Вчера',body:'Коллеги, отправляю краткое обновление по задачам.',signature:'Outlook',avatar:'П',color:'#e90'}
+};
+let active='mail',folder='inbox',custom=[];
+function notify(s){const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(window._toast);window._toast=setTimeout(()=>t.classList.remove('show'),2400)}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderAccounts(){$('accounts').innerHTML=accounts.map(a=>'<button class="account '+(a.id===active?'active':'')+'" data-id="'+safe(a.id)+'" title="'+safe(a.email)+'">'+safe(a.icon)+'<span class="tip">'+safe(a.name)+' · '+safe(a.provider)+'<br>'+safe(a.email)+'</span></button>').join('')+'<button class="add" id="add">+</button>';document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{active=b.dataset.id;folder='inbox';renderAccounts();renderFolders();renderMessage()});$('add').onclick=()=>$('connectModal').classList.add('open')}
+function renderFolders(){$('folders').innerHTML=folders.map(f=>f[0]==='sep'?'<div class="sep"></div>':'<button class="folder '+(f[0]===folder?'active':'')+'" data-folder="'+f[0]+'"><span class="ico">'+f[2]+'</span><span class="word">'+f[1]+'</span>'+(f[3]?'<span class="count">'+f[3]+'</span>':'')+'</button>').join('');document.querySelectorAll('[data-folder]').forEach(b=>b.onclick=()=>{folder=b.dataset.folder;renderFolders();renderMessage()})}
+function renderMessage(){const a=accounts.find(x=>x.id===active),m=demos[active]||{sender:'Почтовый ящик',subject:'Аккаунт добавлен',date:'Только что',body:'Аккаунт сохранён в интерфейсе. Реальная синхронизация ещё не подключена.',avatar:a.icon,color:a.color};if(!['inbox','all'].includes(folder)){$('message').innerHTML='<div class="empty"><div><div style="font-size:42px">'+(folders.find(f=>f[0]===folder)||[])[2]+'</div><b>'+(folders.find(f=>f[0]===folder)||[])[1]+'</b><p>Демонстрационный режим: письма из этой папки пока не загружаются.</p></div></div>';return}$('message').innerHTML='<h1 class="subject">'+safe(m.subject)+'</h1><div class="senderrow"><div class="avatar" style="background:'+m.color+'">'+safe(m.avatar)+'</div><div><div><span class="sender">'+safe(m.sender)+'</span><span class="date">'+safe(m.date)+'</span></div><div class="to">Кому: вам</div></div></div><div class="bodytext">'+safe(m.body).replace(/\n/g,'<br>')+'<div class="signature">'+safe(m.signature||'')+'</div></div><div class="replybar"><button data-action="reply">↶ Ответить</button><button data-action="replyall">↶ Ответить всем</button><button data-action="forward">↗ Переслать</button></div>';document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{if(b.dataset.action==='reply'||b.dataset.action==='replyall'||b.dataset.action==='forward'){$('subject').value=(b.dataset.action==='forward'?'Fwd: ':'Re: ')+m.subject;$('body').value=b.dataset.action==='forward'?'':'\n\n'+m.body;$('composeModal').classList.add('open')}else notify('Действие доступно после подключения почтового API')})}
+function closeModal(id){$(id).classList.remove('open')}window.closeModal=closeModal;
+$('compose').onclick=()=>$('composeModal').classList.add('open');
+$('send').onclick=()=>notify('Отправка станет доступна после подключения почтового API');
+$('toolbar')?.addEventListener('click',()=>{});
+document.querySelectorAll('.toolbar [data-action]').forEach(b=>b.onclick=()=>notify('Действие станет доступно после подключения почтового API'));
+$('search').addEventListener('keydown',e=>{if(e.key==='Enter')notify('Поиск заработает после подключения почтового API')});
+$('syncButton').onclick=async()=>{try{const r=await fetch('/api/status');const d=await r.json();notify('Сервер доступен · версия '+d.version)}catch(e){notify('Backend не запущен. Смотри README.md')}};
+$('addAccount').onclick=()=>{const name=$('accountName').value.trim(),email=$('accountEmail').value.trim();if(!name||!email.includes('@'))return notify('Укажи название и корректный email');if(accounts.some(a=>a.email.toLowerCase()===email.toLowerCase()))return notify('Этот адрес уже добавлен');const p=$('provider').value,id='custom'+Date.now(),icon=p==='Яндекс'?'Я':p==='Gmail'?'M':p==='Outlook'?'O':'✉',color=p==='Яндекс'?'#e33':p==='Gmail'?'#4285f4':'#82939e';accounts.push({id,name,provider:p,icon,email,color});demos[id]={sender:'Новый аккаунт',subject:'Аккаунт добавлен в интерфейс',date:'Только что',body:'Реальное подключение почты ещё не настроено.',avatar:icon,color};try{localStorage.setItem('mail_agent_accounts',JSON.stringify(accounts.filter(a=>a.id.startsWith('custom'))))}catch(e){}active=id;renderAccounts();renderMessage();closeModal('connectModal');notify('Аккаунт добавлен в интерфейс')};
+function restore(){try{custom=JSON.parse(localStorage.getItem('mail_agent_accounts')||'[]');custom.forEach(a=>{if(!accounts.some(x=>x.email===a.email)){accounts.push(a);demos[a.id]={sender:'Новый аккаунт',subject:'Аккаунт добавлен',date:'Ранее',body:'Почтовая синхронизация ещё не подключена.',avatar:a.icon,color:a.color}}})}catch(e){}}
+let pending=null;
+$('backgroundButton').onclick=()=>$('bgModal').classList.add('open');
+$('bgFile').onchange=e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')||f.size>2*1024*1024)return notify('Выбери изображение до 2 МБ');const r=new FileReader();r.onload=()=>{pending=r.result;$('preview').style.backgroundImage='url("'+pending+'")'};r.readAsDataURL(f)};
+function setBg(data){document.body.style.backgroundImage=data?'linear-gradient(#0001,#0001),url("'+data+'")':'';document.body.style.backgroundSize=data?'cover':'';document.body.style.backgroundPosition=data?'center':'';document.documentElement.style.setProperty('--pane-image',data?'url("'+data+'")':'none')}
+$('applyBg').onclick=()=>{if(!pending)return notify('Сначала выбери изображение');try{localStorage.setItem('mail_agent_bg',pending)}catch(e){return notify('Изображение слишком большое для хранения')};setBg(pending);closeModal('bgModal');notify('Фон применён: общий фон 100%, под письмом около 5%')};
+$('resetBg').onclick=()=>{localStorage.removeItem('mail_agent_bg');pending=null;setBg(null);$('preview').style.backgroundImage='';notify('Стандартный фон восстановлен')};
+try{const bg=localStorage.getItem('mail_agent_bg');if(bg)setBg(bg)}catch(e){}
+restore();renderAccounts();renderFolders();renderMessage();
+</script>
+</body>
+</html>
